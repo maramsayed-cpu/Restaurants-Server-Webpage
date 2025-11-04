@@ -3,8 +3,8 @@ A simple webpage simulating the process of ordering from a restaurant, and using
 
 Example:
 
-<img width="715" height="425" alt="Screenshot 2025-11-03 at 8 53 12 PM" src="https://github.com/user-attachments/assets/fe8ea7e3-2df6-4fc9-8203-00198bf82c52" />
-<img width="710" height="421" alt="Screenshot 2025-11-03 at 8 53 22 PM" src="https://github.com/user-attachments/assets/dbe0b003-268a-4699-b77b-03e7730720c0" />
+<img width="347" height="210" alt="Screenshot 2025-11-03 at 8 53 12 PM" src="https://github.com/user-attachments/assets/fe8ea7e3-2df6-4fc9-8203-00198bf82c52" />
+<img width="360" height="210" alt="Screenshot 2025-11-03 at 8 53 22 PM" src="https://github.com/user-attachments/assets/dbe0b003-268a-4699-b77b-03e7730720c0" />
 
 Files:
 server.js (server file)

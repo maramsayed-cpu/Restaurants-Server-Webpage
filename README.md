@@ -1,25 +1,15 @@
-COMP 2406 - Assignment 2
 
-Name: Maram Sayed
-Student #: 101304334
-
-Files
-client
-img 
-    add.png (never actually used)
-    remove.png (never actually used)
-clients.js (restaurants information) (never actually used)
+Files:
 server.js (server file)
 stats.pug (template engine)
-restaurants
-    example-menu-data.txt
-    style.css (element styling)
+example-menu-data.txt
+frodo.json
+lembas.json
+aragorn.json
 orderForm.html
 home.html
 
-
 Design Choices:
-I chose to keep the orderForm javascript in the html file to make it easier to read
 I made the position of the category names fixed, so that the user can click to the section they want wherever they are in the page.
 The width of the columns scales based on the size of the window.
 

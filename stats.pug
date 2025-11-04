@@ -1,0 +1,29 @@
+html
+  head
+    title Res Stats
+  body
+
+    div 
+      h5 
+        a(href="home.html") Home Page 
+      h5 
+        a(href="orderForm.html") Order Form 
+      h5 
+        a(href="stats.html") Restaurant Stats 
+
+    div
+      h1 Restaurant Stats
+
+      ul
+        each stat in stats
+          h3 
+            li= stat.name 
+
+          ul 
+            li= "Number of orders: " + stat.totalOrders
+            li= "Average order total: $" + stat.avgTotal.toFixed(2)
+            li= "Most popular item: " + stat.popItem 
+          br 
+            
+                
+                

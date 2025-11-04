@@ -1,0 +1,632 @@
+<!-- 
+ Student Name: Maram Sayed
+ Student #: 101304334
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Restaurants</title>
+    
+</head>
+<body>
+
+    <h5><a href = "home.html"> Home </a></h5>
+    <h5><a href = "orderForm.html"> Order Form </a></h5>
+    <h5><a href = "stats.html"> Restaurant Stats </a></h5>
+
+    <h2>My Restaurants</h2>
+
+    <div><select id="restaurantsList" >
+        <option>Select a restaurant</option>
+    </select></div>
+
+    <h1 id = restaurantName></h1>
+    <p id = minOrder class = resInfo ></p>
+    <p id = charge class = resInfo ></p>
+
+    <div class = column1>
+        <h3 id = categories class = columnTitle > Categories</h3>
+        <ul id = categoryItems class = column2></ul>
+    </div>
+
+    
+
+    <div class = column1 >
+        <h3 id = menu class = columnTitle > Menu </h3>
+        <ul id = menuItems class = column2></ul>
+    </div>
+
+    
+
+    <div class = column1>
+        <h3 id = order class = columnTitle> Order Summary </h3>
+        <div id = orderSection class = column2>
+            <ul id = orderItems subTotal = 0></ul>
+           
+            <div id = subTotal class = standOut>Sub Total: $0.00</div>
+            <div id = deliveryFee class = standOut>Delivery fee: $0.00</div>
+            <div id = tax class = standOut>Tax: $0.00</div>
+            <div id = currentTotal class = standOut>Current Total: $0.00</div>
+            <br> 
+            <button id = submitButton></button>
+            <div id = message></div>
+            
+        </div>
+    </div>
+
+    <style>
+        .column1{
+            float: left;
+            width: 31.5%;
+            margin-right:0.875%;
+            margin-left: 0.875%
+            
+        }
+
+        .row:after{
+            content:"";
+            display: table;
+            clear: both;
+        }
+
+        .columnTitle{
+            text-align: center;
+            outline-color:green;
+            outline-style:double;
+            padding: 10px;
+            font-family: Luminari;
+            color:darkgreen;
+        }
+
+        #restaurantName{
+            padding: 10px;
+            color:darkgreen;
+            font-family: Luminari;
+            text-align: center;
+        }
+
+        .categoryTitle{
+            color:darkgreen;
+            font-family: Luminari;
+        }
+
+        .description{
+            font-style:italic;
+            color:darkgreen;
+        }
+
+        .resInfo{
+            text-align: center;
+            color:darkgreen;
+            font-family: Luminari;
+        }
+
+        .button{
+            float: right;
+            width: 8%;
+            height: auto;
+        }
+
+        .standOut{
+            font-weight: bold;
+        }
+
+        #button{
+            padding: 100%;
+            background-color: aliceblue;
+            border-color: aliceblue;
+            
+        }
+
+        #categoryItems{
+            position: fixed;
+        }
+
+        .column2{
+            width: auto;
+        }
+
+    </style>
+
+    <script>
+        const resList = document.getElementById("restaurantsList");
+
+        // 
+        (function setRestaurantsInfo() {
+            req = new XMLHttpRequest();
+            req.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+
+                    // this returns the names of the restaurants and adds
+                    // them to drop-down list
+                    const resList = document.getElementById("restaurantsList");
+                    const resNames = JSON.parse(this.responseText);
+                    
+                    for (let i = 0; i < resNames.length; i++){
+                        console.log(resNames[i]);
+                    }
+                    //console.log(restaurants);
+                    resNames.forEach((name) => {
+                        const option = document.createElement("option");
+                        option.value = name;;
+                        option.textContent = name;
+                        resList.appendChild(option);
+                    });
+
+                    // when restaurant in drop-down list is changed, send request 
+                    // to get restaurant information
+                    // then display it
+                    resList.addEventListener("change", function () {
+                    
+                        req = new XMLHttpRequest();
+                        req.onreadystatechange = function () {
+                            if (this.readyState == 4 && this.status == 200) {
+                                console.log("hey");
+                                const orderList = document.getElementById("orderItems");
+
+                                //if items in order list, send confirmation message
+                                if (orderList.innerHTML !== "") {
+                                    resChangeConfirmation();
+                                }
+                                //if no items in order yet, just change restaurant
+                                else {
+                                    console.log("hi");
+                                    const temp = JSON.parse(this.responseText);
+                                    const restaurants = [];
+                                    for (let i = 0; i < temp.length; i++){
+                                        restaurants.push(JSON.parse(temp[i]));
+                                    }
+                                    console.log(restaurants);
+                                    resChangeConfirmation(restaurants);
+                                }
+                            } else if (this.readyState == 4 && this.status == 500) {
+                                alert("The server broke.");
+                            }
+                        };
+
+                        req.open("GET", "http://localhost:2406/resInfo");
+                        req.send();
+                    });
+
+                } else if (this.readyState == 4 && this.status == 500) {
+                alert("The server broke.");
+                }
+            };
+
+            req.open("GET", "http://localhost:2406/restaurants");
+            req.send();
+        })();
+
+
+        //function to get confrimation to change restaurant
+        function resChangeConfirmation(restaurants) {
+            //if they confirm change
+            if (confirm("If you're sure you want to clear your order, press 'OK'.")) {
+                displayRestaurant(restaurants);
+
+                //make this the new previous restaurant
+                previousOption = this.value;
+            }
+            //if they cancel change
+            else {
+                //set the drop-down list's current value
+                //to original restaurant before change
+                resList.value = previousOption;
+            }
+        }
+
+        function displayRestaurant(restaurants) {
+            
+            const orderList = document.getElementById("orderItems");
+            orderList.innerHTML = "";
+
+            const name = document.getElementById("restaurantName");
+            const minOrder = document.getElementById("minOrder");
+            const deliveryCharge = document.getElementById("charge");
+
+            //clear menu items
+            const menuList = document.getElementById("menuItems");
+            menuList.innerHTML = "";
+
+            //clear categories
+            const categoryList = document.getElementById("categoryItems");
+            categoryList.innerHTML = "";
+
+            const deliveryFee = document.getElementById("deliveryFee");
+            
+
+            //iterate through the restaurants to check which was chosen
+            restaurants.forEach((item1) => {
+                if (resList.value === "Select a restaurant") {
+                    //default value, return to original page
+                    location.reload();
+                }
+                //if found matching restaurant
+                else if (Object.values(item1)[1] === resList.value) {
+                    //add the restaurant's name, min order, and delivery charge
+                    //to page
+                    name.innerHTML = Object.values(item1)[1];
+                    minOrder.innerHTML = "Minimum Order: $" + Object.values(item1)[2].toFixed(2);
+                    //the one at top of page
+                    deliveryCharge.innerHTML =
+                        "Delivery Charge: $" + Object.values(item1)[3].toFixed(2);
+                    //the one in order summary column
+                    deliveryFee.innerHTML =
+                        "Delivery Fee: $" + Object.values(item1)[3].toFixed(2);
+
+                    //get the menu category names
+                    const menu = Object.values(item1)[4];
+                    const categoryNames = Object.keys(menu);
+
+                    //add category names to categories column
+                    addCategoryLinks(categoryNames, categoryList);
+
+                    //self explanatory function
+                    (function addMenuItems() {
+                        categoryNames.forEach((name, index) => {
+                        const categoryTitle = document.createElement("p");
+                        categoryTitle.classList.add("categoryTitle");
+                        categoryTitle.innerHTML = name;
+                        categoryTitle.setAttribute("id", name);
+                        menuList.appendChild(categoryTitle);
+
+                        //get the sections in each category
+                        const sections = Object.values(menu)[index];
+                        const sectionValues = Object.keys(sections);
+
+                        //add menu items of that category
+                        addCategoryItems(sectionValues, menuList, sections);
+                        });
+                    })();
+
+                    //reset order summary information for restaurant change
+                    orderList.setAttribute("subTotal", 0);
+                    changeSubTotal(orderList, 0, 0);
+                    changeTax(0);
+                    changeCurrentTotal(0, 0);
+                    checkSubTotal(orderList.getAttribute("subTotal"));
+                }
+            });
+            
+        }
+
+        //under the categories column, add the name of each
+        //category as a link that takes it to where that section
+        //is in the menu column
+        function addCategoryLinks(categoryNames, categoryList) {
+            categoryNames.forEach((name, index) => {
+                const link = document.createElement("a");
+                const id = "#" + name;
+
+                link.href = id;
+                link.textContent = categoryNames[index];
+                link.classList.add("categoryTitle");
+
+                categoryList.appendChild(link);
+                categoryList.appendChild(document.createElement("br"));
+            });
+        }
+
+        //for each section in a category, add the menu items
+        function addCategoryItems(sectionValues, menuList, sections) {
+            sectionValues.forEach((value, index2) => {
+                //these are the name, description, and price of each item
+                const sectionMenuItemAttributes = Object.values(sections)[index2];
+
+                const addButton = document.createElement("button");
+                addButton.classList.add("button");
+                addButton.textContent = "+";
+
+                const itemName = Object.values(sectionMenuItemAttributes)[0];
+                const itemDescription = Object.values(sectionMenuItemAttributes)[1];
+                const itemPrice = Object.values(sectionMenuItemAttributes)[2];
+
+                //make a div to store name, price, and add button
+                const itemDiv = document.createElement("div");
+
+                const listItem = document.createElement("li");
+                listItem.value = itemName;
+                listItem.textContent = itemName + "...$" + itemPrice.toFixed(2);
+                //this will tell us how many of that item are in
+                //the order
+                document.createAttribute("counter");
+                listItem.setAttribute("counter", 1);
+
+                document.createAttribute("name");
+                listItem.setAttribute("name", itemName);
+
+                //add components to div
+                itemDiv.appendChild(listItem);
+                itemDiv.appendChild(addButton);
+
+                //make a separate paragraph element for the item description
+                const description = document.createElement("p");
+                description.classList.add("description");
+                description.innerHTML = itemDescription;
+
+                //add div and description to menu column
+                menuList.appendChild(itemDiv);
+                menuList.appendChild(description);
+
+                //when add button is clicked, check if item is already in order
+                addButton.addEventListener("click", (event) => {
+                    checkForMultiple(itemDiv, description);
+                });
+            });
+            menuList.appendChild(document.createElement("br"));
+        }
+
+        //check if item is already in order, and proceed accordingly
+        function checkForMultiple(itemDiv, description) {
+            const orderList = document.getElementById("orderItems");
+            const listItems = orderList.querySelectorAll("li");
+            let check = 0;
+
+            //if no items yet, just add item to order
+            if (listItems.length === 0) {
+                addItemToOrder(itemDiv.children[0], description);
+            }
+            //otherwise, iterate through the order items to see
+            //which one is going to increase
+            else {
+                listItems.forEach((item) => {
+                if (
+                    item.getAttribute("name") === itemDiv.children[0].getAttribute("name")
+                ) {
+                    //change the count of the item, and display the new amount and price
+                    const counterValue = item.getAttribute("counter");
+                    const newCounterValue = Number(counterValue) + 1;
+                    item.setAttribute("counter", newCounterValue);
+                    item.textContent =
+                    "(" +
+                    item.getAttribute("counter") +
+                    ") " +
+                    itemDiv.children[0].textContent;
+                    check += 1;
+
+                    changeTotalPrice(item.parentNode, item, true);
+                }
+                });
+
+                //if item wasnt already in order, just add it
+                if (check === 0) {
+                addItemToOrder(itemDiv.children[0], description);
+                }
+            }
+        }
+
+        //add new item to order
+        function addItemToOrder(listItem, description) {
+            const orderList = document.getElementById("orderItems");
+            const listItems = orderList.querySelectorAll("li");
+
+            //make a clone of the item
+            const listItemClone = listItem.cloneNode(true);
+            const descriptionClone = description.cloneNode(true);
+
+            //display item and amount number
+            listItemClone.textContent =
+                "(" +
+                listItemClone.getAttribute("counter") +
+                ") " +
+                listItemClone.textContent;
+
+            //this is the remove button
+            const removeButton = document.createElement("button");
+            removeButton.classList.add("button");
+            removeButton.textContent = "-";
+
+            //make div for item name, price, total item price, and button
+            const itemDiv = document.createElement("div");
+
+            //make div for total item price (price x units)
+            const totalItemPriceDiv = document.createElement("div");
+
+            //get the price amount
+            const string = listItemClone.textContent;
+            const indexOf$ = string.indexOf("$");
+            const price = parseFloat(string.slice(indexOf$ + 1));
+
+            //update total item price section (in this case, just the item price)
+            totalItemPriceDiv.innerHTML = "Total Item Price: $" + price.toFixed(2);
+
+            //add all components to div
+            itemDiv.appendChild(listItemClone);
+            itemDiv.appendChild(removeButton);
+            itemDiv.appendChild(document.createElement("br"));
+            itemDiv.appendChild(totalItemPriceDiv);
+
+            //add div and description to order summary
+            orderList.appendChild(itemDiv);
+            orderList.appendChild(descriptionClone);
+
+            //update subtotal
+            changeSubTotal(orderList, price, true);
+
+            //when remove button is clicked, remove item or update amount number
+            removeButton.addEventListener("click", (event) => {
+                removeItemFromOrder(itemDiv, descriptionClone);
+            });
+        }
+
+        //remove item or update amount number
+        function removeItemFromOrder(itemDiv, description) {
+            const orderList = document.getElementById("orderItems");
+
+            //if more than one of item in order
+            if (itemDiv.children[0].getAttribute("counter") > 1) {
+                //descrease amount by 1
+                const counterValue = itemDiv.children[0].getAttribute("counter");
+                const newCounterValue = Number(counterValue) - 1;
+                itemDiv.children[0].setAttribute("counter", newCounterValue);
+
+                //display new item count
+                const string = itemDiv.children[0].textContent;
+                const indexOfRightBracket = string.indexOf(")");
+                const newString = string.slice(indexOfRightBracket + 1);
+                itemDiv.children[0].textContent =
+                "(" + itemDiv.children[0].getAttribute("counter") + ") " + newString;
+
+                //update total item price
+                changeTotalPrice(itemDiv, itemDiv.children[0], false);
+            }
+            //if there was just one of item, get its price to update
+            //subtotal, and remove it from order summary
+            else {
+                const string = itemDiv.children[0].textContent;
+                const indexOf$ = string.indexOf("$");
+                const price = parseFloat(string.slice(indexOf$ + 1));
+                changeSubTotal(itemDiv.parentNode, price, false);
+                orderList.removeChild(itemDiv);
+                orderList.removeChild(description);
+            }
+        }
+
+        //uodate current total amount
+        function changeCurrentTotal(subTotalValue, taxValue) {
+            const currentTotal = document.getElementById("currentTotal");
+            const deliveryFee = document.getElementById("deliveryFee");
+
+            const string = deliveryFee.innerHTML;
+            const indexOf$ = string.indexOf("$");
+            const deliveryFeeValue = parseFloat(string.slice(indexOf$ + 1));
+
+            let currentTotalValue = 0;
+            currentTotalValue = subTotalValue + taxValue + deliveryFeeValue;
+
+            currentTotal.innerHTML = "Current Total: $" + currentTotalValue.toFixed(2);
+        }
+
+        //update current tax amount
+        function changeTax(subTotalValue) {
+            const tax = document.getElementById("tax");
+
+            let taxValue = 0;
+            //changed from 13% to 10%
+            taxValue = subTotalValue * 0.10;
+
+            tax.innerHTML = "Tax: $" + taxValue.toFixed(2);
+
+            changeCurrentTotal(subTotalValue, taxValue);
+        }
+
+        //check if subtotal is below or over min order
+        function checkSubTotal(subTotal) {
+            const minOrder = document.getElementById("minOrder");
+
+            const string = minOrder.innerHTML;
+            const indexOf$ = string.indexOf("$");
+            const minOrderValue = parseFloat(string.slice(indexOf$ + 1));
+
+            const amountLeft = minOrderValue - subTotal;
+
+            const button = document.getElementById("submitButton");
+            const message = document.getElementById("message");
+
+            //if over/equal to min order, display button to submit order
+            if (subTotal >= minOrderValue) {
+                button.innerHTML = "Submit Order";
+                message.innerHTML = "";
+
+                
+                function sendOrder() {
+                    
+                    req = new XMLHttpRequest();
+                    req.onreadystatechange = function () {
+                        if (this.readyState == 4 && this.status == 200) {
+
+                            // response came back successfully and order 
+                            // info was sent, reload the page
+                            const response = JSON.parse(this.responseText);
+                            alert("Order has been submitted.");
+                            location.reload();   
+
+                        } else if (this.readyState == 4 && this.status == 500) {
+                            alert("The server broke.");
+                        }
+                    };
+
+                    const orderList = document.getElementById("orderItems");
+                    const name = document.getElementById("restaurantName");
+
+                    const total = document.getElementById("currentTotal");
+                    const string = total.textContent;
+                    const indexOf$ = string.indexOf("$");
+                    const price = parseFloat(string.slice(indexOf$ + 1));
+
+                    // send order info to server
+                    req.open("POST", "http://localhost:2406/orderInfo");
+                    req.send(JSON.stringify({"resName": name.textContent, "orders": orderList.textContent.split("("), "total": price}));
+                };
+
+                // if order is submitted (button is clicked), 
+                // send the order information to the server
+                button.onclick = sendOrder;
+            }
+            //otherwise, tell user how much they need to add to get
+            //to min order
+            else {
+                message.innerHTML =
+                "$" + amountLeft.toFixed(2) + " must be added before order can be placed";
+                button.innerHTML = "";
+            }
+        }
+
+        //update subtotal
+        //the third parameter is a boolean value to indicate whether
+        //we're adding the price (so adding an item) or subtracting the
+        //price (so removing an item)
+        function changeSubTotal(orderList, price, add) {
+            const subTotal = document.getElementById("subTotal");
+            const deliverySubTotal = orderList.getAttribute("subTotal");
+
+            if (add) {
+                const newDeliverySubTotal = Number(deliverySubTotal) + price;
+                orderList.setAttribute("subTotal", newDeliverySubTotal);
+            } else {
+                const newDeliverySubTotal = Number(deliverySubTotal) - price;
+                orderList.setAttribute("subTotal", newDeliverySubTotal);
+            }
+
+            const number = parseFloat(orderList.getAttribute("subTotal"));
+
+            subTotal.innerHTML = "Sub total: $" + number.toFixed(2);
+
+            //update tax and check subtotal
+            changeTax(number);
+            checkSubTotal(number);
+        }
+
+        //update total item price
+        //the third parameter is a boolean value to indicate whether
+        //we're adding the price (so adding an item) or subtracting the
+        //price (so removing an item)
+        function changeTotalPrice(itemDiv, item, add) {
+            const totalItemPriceDiv = document.createElement("div");
+            const string = item.textContent;
+            const indexOf$ = string.indexOf("$");
+            const price = parseFloat(string.slice(indexOf$ + 1));
+            const totalPrice = price * item.getAttribute("counter");
+
+            const newString = "Total Item Price: $" + totalPrice.toFixed(2);
+
+            console.log(itemDiv.children);
+            totalItemPriceDiv.innerHTML = newString;
+
+            if (add) {
+                changeSubTotal(itemDiv.parentNode, price, true);
+            } else {
+                changeSubTotal(itemDiv.parentNode, price, false);
+            }
+
+            itemDiv.removeChild(itemDiv.children[3]);
+            itemDiv.appendChild(totalItemPriceDiv);
+        }
+    </script>
+
+    
+</body>  
+    
+</html>

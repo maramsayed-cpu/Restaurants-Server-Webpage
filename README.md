@@ -1,5 +1,5 @@
 Description:
-A simple webpage simulating the process of ordering from a restaurant, and using a server to send recieve/send information
+A simple webpage simulating the process of ordering from a restaurant, and using a server to send recieve/send information. The program also uses a template engine to implement the restaurant statistics page. 
 
 Example:
 

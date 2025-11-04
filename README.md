@@ -7,13 +7,13 @@ Example:
 <img width="360" height="210" alt="Screenshot 2025-11-03 at 8 53 22 PM" src="https://github.com/user-attachments/assets/dbe0b003-268a-4699-b77b-03e7730720c0" />
 
 Files:
-server.js (server file)
-stats.pug (template engine)
-example-menu-data.txt
-frodo.json
-legolas.json
-aragorn.json
-orderForm.html
+server.js (server file),
+stats.pug (template engine),
+example-menu-data.txt,
+frodo.json,
+legolas.json,
+aragorn.json,
+orderForm.html,
 home.html
 
 Design Choices:

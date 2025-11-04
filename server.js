@@ -1,11 +1,4 @@
-/*
- Student Name: Maram Sayed
- Student #: 101304334
-*/
-
-//Base code server for Assignment 2, COMP 2406, Fall 2025
-//author: andrew runka
-//date: fall 2025
+// some parts are not my own code
 
 const http = require("http");
 const fs = require("fs");
@@ -207,3 +200,4 @@ fs.readdir("./restaurants", (err, files) => {
 });
 
 console.log(`Server running at http://localhost:${serverContext.port}/`);
+
